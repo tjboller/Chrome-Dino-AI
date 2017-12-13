@@ -57,15 +57,9 @@ result = spsa(ai.get_performance_cost, ai.strategy, file_name='logistic', c=1, a
 
 I use match template in OpenCV to find where in the screen the game is playing (region of interest). Then I use a python package called MSS (multiple screen shots) to quickly take a greyscale screen shot of the game region. To find the obstacles (the cacti) all we have to do is take average the column pixel values. The columns that are sufficiently dark have an obstacle. Since the cacti often occur in little groups, we have to define a minimum distance parameter such that if the number of pixels between two columns containing cacti is less than the distance parameter, it is considered the same obstacle. 
 
-The state $s$ of the game is defined as :
+The state *s* of the game is defined as :
 
-\begin{equation}
-s = \begin{bmatrix}
-\text{Distance to the nearest obstacle} \\
-\text{Width of nearest obstacle}\\
-\text{Seconds since the start}
-\end{bmatrix}
-\end{equation}
+<a href="http://www.codecogs.com/eqnedit.php?latex=s&space;=&space;\begin{bmatrix}&space;\text{Distance&space;to&space;the&space;nearest&space;obstacle}&space;\\&space;\text{Width&space;of&space;nearest&space;obstacle}\\&space;\text{Seconds&space;since&space;the&space;start}&space;\end{bmatrix}" target="_blank"><img src="http://latex.codecogs.com/gif.latex?s&space;=&space;\begin{bmatrix}&space;\text{Distance&space;to&space;the&space;nearest&space;obstacle}&space;\\&space;\text{Width&space;of&space;nearest&space;obstacle}\\&space;\text{Seconds&space;since&space;the&space;start}&space;\end{bmatrix}" title="s = \begin{bmatrix} \text{Distance to the nearest obstacle} \\ \text{Width of nearest obstacle}\\ \text{Seconds since the start} \end{bmatrix}" /></a>
 
 We do not need *really* to carry information about other obstacles as the optimal jump is always to just make it over the first obstacle to give the maximum amount of time to the next obstacle. (We could learn a risk aversion type thing where if the next obstacle is far away it will jump with plenty of room on both sides, but I figure the added benefit would be small so the extra dimensionally wouldn't be worth it)
 
@@ -74,23 +68,23 @@ The seconds from start acts as the score and as a proxy for the speed at which t
 
 ## AIs 
 
-We can think of our AI strategy as a function that takes as input the state $s$ and returns a scalar between $0$ and $1$ such that if the scalar is above $.5$ the dinosaur should jump.
+We can think of our AI strategy as a function that takes as input the state *s* and returns a scalar between 0 and 1 such that if the scalar is above .5 the dinosaur should jump.
 
-The true fitness of the strategy is the _expected_ run time of the game. Obviously we cannot directly measure the expected run time, but we can get an estimate using the average of $n$ different runs.
+The true fitness of the strategy is the _expected_ run time of the game. Obviously we cannot directly measure the expected run time, but we can get an estimate using the average of *n* different runs.
 
 There are two main challenges to training the AI for our simple dinosaur game.
 1. The score is a noisy measurement of the true fitness of the strategy. 
 2. Function evaluation is expensive. The better the strategy the longer the function runs but often a single game run takes between 5 and 100 seconds.
 
-You can also see that there is a trade-off between the two challenges. We can reduce the noise in our measurements by increasing $n$, the number of runs averaged to get an estimate of the true fitness. As we increase $n$ the expected computational time increases linearly while the variance only decreases in proportion to the square root of $n$. 
+You can also see that there is a trade-off between the two challenges. We can reduce the noise in our measurements by increasing *n*, the number of runs averaged to get an estimate of the true fitness. As we increase *n* the expected computational time increases linearly while the variance only decreases in proportion to the square root of *n*. 
 
 ### Rule Based
 
-This AI just says "If the nearest obstacle is less than $x$ pixels away, jump"
+This AI just says "If the nearest obstacle is less than *x* pixels away, jump"
 
 
 ##### Results
-It's not hard to explore the entire reasonable parameter space for the rule $x$. The graph below shows the average score and error bars for 10 runs for each rule
+It's not hard to explore the entire reasonable parameter space for the rule *x*. The graph below shows the average score and error bars for 10 runs for each rule
 
 <a href="https://imgur.com/qaIkRwM"><img src="https://i.imgur.com/qaIkRwM.png" /></a>
 
@@ -116,37 +110,31 @@ Not really surprised I am able to outperform the rule based system since it does
 
 The logistic decision algorithm learns a vector 
 
-\begin{equation}
-\theta = \begin{bmatrix}\theta_0 & \theta_1 & \theta_2 & \theta_3\end{bmatrix}
-\end{equation}
+<a href="http://www.codecogs.com/eqnedit.php?latex=\theta&space;=&space;\begin{bmatrix}\theta_0&space;&&space;\theta_1&space;&&space;\theta_2&space;&&space;\theta_3\end{bmatrix}" target="_blank"><img src="http://latex.codecogs.com/gif.latex?\theta&space;=&space;\begin{bmatrix}\theta_0&space;&&space;\theta_1&space;&&space;\theta_2&space;&&space;\theta_3\end{bmatrix}" title="\theta = \begin{bmatrix}\theta_0 & \theta_1 & \theta_2 & \theta_3\end{bmatrix}" /></a>
 
 The dinosaur will jump if the decision scalar $d$ is greater than $0.5$. The decision scalar is calculated as 
 
-\begin{equation}
-d = \sigma(\theta \cdot s)
-\end{equation}
+<a href="http://www.codecogs.com/eqnedit.php?latex=d&space;=&space;\sigma(\theta&space;\cdot&space;s)" target="_blank"><img src="http://latex.codecogs.com/gif.latex?d&space;=&space;\sigma(\theta&space;\cdot&space;s)" title="d = \sigma(\theta \cdot s)" /></a>
 
 or
 
-\begin{equation}
-d = \sigma(\theta_0 + \theta_1 \cdot \text{Distance to the nearest obstacle} + \theta_2 \cdot \text{Width of nearest obstacle} + \theta_3 \cdot \text{Seconds since the start})
-\end{equation}
+<a href="http://www.codecogs.com/eqnedit.php?latex=d&space;=&space;\sigma(\theta_0&space;&plus;&space;\theta_1&space;\cdot&space;\text{Distance&space;to&space;the&space;nearest&space;obstacle}&space;&plus;&space;\theta_2&space;\cdot&space;\text{Width&space;of&space;nearest&space;obstacle}&space;&plus;&space;\theta_3&space;\cdot&space;\text{Seconds&space;since&space;the&space;start})" target="_blank"><img src="http://latex.codecogs.com/gif.latex?d&space;=&space;\sigma(\theta_0&space;&plus;&space;\theta_1&space;\cdot&space;\text{Distance&space;to&space;the&space;nearest&space;obstacle}&space;&plus;&space;\theta_2&space;\cdot&space;\text{Width&space;of&space;nearest&space;obstacle}&space;&plus;&space;\theta_3&space;\cdot&space;\text{Seconds&space;since&space;the&space;start})" title="d = \sigma(\theta_0 + \theta_1 \cdot \text{Distance to the nearest obstacle} + \theta_2 \cdot \text{Width of nearest obstacle} + \theta_3 \cdot \text{Seconds since the start})" /></a>
 
-where $\sigma$ is the logistic function. 
+where <a href="http://www.codecogs.com/eqnedit.php?latex=$\sigma$" target="_blank"><img src="http://latex.codecogs.com/gif.latex?$\sigma$" title="$\sigma$" /></a> is the logistic function. 
 
 
 ##### Results 
 
-We use SPSA (simultaneous perturbation stochastic approximation) algorithm to optimize the $\theta$ vector to get the optimum expected score. The 'cost' of each run is implemented as the negative score for three different runs.
+We use SPSA (simultaneous perturbation stochastic approximation) algorithm to optimize the <a href="http://www.codecogs.com/eqnedit.php?latex=$\theta$" target="_blank"><img src="http://latex.codecogs.com/gif.latex?$\theta$" title="$\theta$" /></a> vector to get the optimum expected score. The 'cost' of each run is implemented as the negative score for three different runs.
 
 SPSA was chosen because it uses only function measurements, fast (requires only two objective function measurements per iteration regardless of the dimension of the optimization problem) and robust to function noise. 
 
 
-Taking the SPSA parameters a = .5, c = 1 you can see how $\theta$ changes over the thousand optimization iterations. Unfortunately, the theta vector didn't converge nicely. 
+Taking the SPSA parameters a = .5, c = 1 you can see how <a href="http://www.codecogs.com/eqnedit.php?latex=$\theta$" target="_blank"><img src="http://latex.codecogs.com/gif.latex?$\theta$" title="$\theta$" /></a> changes over the thousand optimization iterations. Unfortunately, the theta vector didn't converge nicely. 
 
 <a href="https://imgur.com/cc75sTt"><img src="https://i.imgur.com/cc75sTt.png" title="source: imgur.com" /></a>
 
-Every ten updates to $\theta$ we run a test of three runs see how the score changes over time. You can see how the scores change below.
+Every ten updates to <a href="http://www.codecogs.com/eqnedit.php?latex=$\theta$" target="_blank"><img src="http://latex.codecogs.com/gif.latex?$\theta$" title="$\theta$" /></a> we run a test of three runs see how the score changes over time. You can see how the scores change below.
 
 <a href="https://imgur.com/Irji2Jq"><img src="https://i.imgur.com/Irji2Jq.png" title="source: imgur.com" /></a>
 
